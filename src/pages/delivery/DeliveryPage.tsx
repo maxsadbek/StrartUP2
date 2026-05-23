@@ -17,7 +17,7 @@ import { Truck, MapPin, CreditCard, Package } from 'lucide-react'
 
 const schema = z.object({
   stationId: z.string().min(1),
-  fuelType: z.enum(['ai92', 'ai95', 'ai98', 'diesel', 'gas']),
+  fuelType: z.enum(['ai92', 'ai95', 'ai98', 'diesel', 'metan', 'propan']),
   liters: z.number().min(10).max(200),
   address: z.string().min(5),
   paymentMethod: z.string().min(1),
@@ -26,9 +26,11 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>
 
 const FUEL_TYPES: { value: FuelType; label: string }[] = [
-  { value: 'ai92', label: 'AI-92' },
-  { value: 'ai95', label: 'AI-95' },
-  { value: 'diesel', label: 'Diesel' },
+  { value: 'ai92', label: 'AI-92 Benzin' },
+  { value: 'ai95', label: 'AI-95 Benzin' },
+  { value: 'diesel', label: 'Dizel' },
+  { value: 'metan', label: 'Metan' },
+  { value: 'propan', label: 'Propan' },
 ]
 
 const STEPS = ['Fuel', 'Location', 'Payment', 'Confirm']

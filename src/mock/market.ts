@@ -1,8 +1,9 @@
 export const liveFuelPrices = [
-  { type: 'ai92', label: 'AI-92', price: 10120, change: -0.8, trend: 'down' as const },
-  { type: 'ai95', label: 'AI-95', price: 11320, change: 0.2, trend: 'up' as const },
-  { type: 'ai98', label: 'AI-98', price: 12700, change: 0, trend: 'stable' as const },
-  { type: 'diesel', label: 'Diesel', price: 9850, change: -1.2, trend: 'down' as const },
+  { type: 'ai92' as const, label: 'AI-92 Benzin', price: 10120, change: -0.8, trend: 'down' as const },
+  { type: 'ai95' as const, label: 'AI-95 Benzin', price: 11320, change: 0.2, trend: 'up' as const },
+  { type: 'metan' as const, label: 'Metan', price: 3180, change: -0.5, trend: 'down' as const },
+  { type: 'propan' as const, label: 'Propan', price: 4760, change: 0.1, trend: 'stable' as const },
+  { type: 'diesel' as const, label: 'Dizel', price: 9850, change: -1.2, trend: 'down' as const },
 ]
 
 export const fuelTrends = [

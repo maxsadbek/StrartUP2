@@ -102,9 +102,18 @@ export default function StationDetailPage() {
                 </div>
               </div>
               <div className="flex gap-2">
-                <Button variant="outline">
+                <Button
+                  variant="outline"
+                  onClick={() =>
+                    window.open(
+                      `https://www.google.com/maps/dir/?api=1&destination=${station.lat},${station.lng}&travelmode=driving`,
+                      '_blank',
+                      'noopener,noreferrer',
+                    )
+                  }
+                >
                   <Navigation className="h-4 w-4" />
-                  Navigate
+                  Navigatsiya
                 </Button>
                 <Link to={ROUTES.delivery}>
                   <Button variant="accent">

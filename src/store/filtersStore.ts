@@ -3,11 +3,12 @@ import type { StationFilters } from '@/types/station'
 
 const defaultFilters: StationFilters = {
   fuelTypes: [],
-  maxDistance: 10,
+  maxDistance: 500,
   minRating: 0,
   openNow: false,
   sortBy: 'distance',
   search: '',
+  city: 'all',
 }
 
 interface FiltersState extends StationFilters {
@@ -17,6 +18,7 @@ interface FiltersState extends StationFilters {
   setMaxDistance: (km: number) => void
   setMinRating: (rating: number) => void
   setOpenNow: (open: boolean) => void
+  setCity: (city: string) => void
   reset: () => void
 }
 
@@ -33,5 +35,6 @@ export const useFiltersStore = create<FiltersState>((set) => ({
   setMaxDistance: (maxDistance) => set({ maxDistance }),
   setMinRating: (minRating) => set({ minRating }),
   setOpenNow: (openNow) => set({ openNow }),
+  setCity: (city) => set({ city }),
   reset: () => set(defaultFilters),
 }))

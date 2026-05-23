@@ -10,36 +10,36 @@ import {
 import { AppHeader } from '@/layouts/AppHeader'
 import { PageTransition } from '@/components/shared/PageTransition'
 import { StationCard } from '@/components/shared/StationCard'
-import { StationCardSkeleton } from '@/components/shared/StationCardSkeleton'
 import { FuelPriceBadge } from '@/components/shared/FuelPriceBadge'
+import { NearestStationsSection } from '@/features/stations/NearestStationsSection'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
-import { useStations } from '@/hooks/useStations'
+import { useNearestStations } from '@/hooks/useNearestStations'
 import { useDeliveryOrders } from '@/hooks/useDelivery'
 import { useFavoritesStore } from '@/store/favoritesStore'
 import { useAuthStore } from '@/store/authStore'
 import { liveFuelPrices, fuelTrends } from '@/mock/market'
-import { mockStations } from '@/mock/stations'
 import { ROUTES } from '@/constants/routes'
-import { formatPrice, formatQueue } from '@/utils/format'
+import { formatPrice, formatQueue, formatDistance } from '@/utils/format'
 
 export default function DashboardPage() {
-  const { data: stations, isLoading } = useStations()
+  const { nearest, isLoading: stationsLoading } = useNearestStations(3)
   const { data: deliveries } = useDeliveryOrders()
   const favoriteIds = useFavoritesStore((s) => s.ids)
   const user = useAuthStore((s) => s.user)
-  const nearby = stations?.slice(0, 3) ?? []
-  const cheapest = [...mockStations].sort(
+
+  const closest = nearest[0]
+  const cheapestAmongNearest = [...nearest].sort(
     (a, b) =>
       Math.min(...a.prices.map((p) => p.price)) - Math.min(...b.prices.map((p) => p.price)),
   )[0]
-  const favorites = mockStations.filter((s) => favoriteIds.includes(s.id)).slice(0, 2)
+  const favorites = nearest.filter((s) => favoriteIds.includes(s.id)).slice(0, 2)
 
   return (
     <>
-      <AppHeader title={`Hello, ${user?.name?.split(' ')[0] ?? 'Driver'}`} />
+      <AppHeader title={`Salom, ${user?.name?.split(' ')[0] ?? 'Haydovchi'}`} />
       <PageTransition className="flex-1 p-4 lg:p-6">
         <div className="mx-auto max-w-7xl space-y-6">
           {user?.isTaxiMode && (
@@ -48,10 +48,13 @@ export default function DashboardPage() {
               animate={{ opacity: 1, y: 0 }}
               className="rounded-xl border border-fuel-orange/30 bg-fuel-orange/10 px-4 py-3 text-sm"
             >
-              <span className="font-medium text-fuel-orange">Taxi mode active</span>
-              <span className="text-muted-foreground"> — Priority lanes & cheapest fuel alerts enabled</span>
+              <span className="font-medium text-fuel-orange">Taksi rejimi yoqilgan</span>
+              <span className="text-muted-foreground"> — Eng arzon yoqilg‘i bildirishnomalari faol</span>
             </motion.div>
           )}
+
+          {/* Eng yaqin zapravkalar — asosiy blok */}
+          <NearestStationsSection limit={5} />
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {liveFuelPrices.map((p) => (
@@ -62,18 +65,20 @@ export default function DashboardPage() {
           <div className="grid gap-6 lg:grid-cols-3">
             <Card className="lg:col-span-2">
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>Nearby stations</CardTitle>
+                <CardTitle>Yaqin atrofdagi stansiyalar</CardTitle>
                 <Link to={ROUTES.map}>
                   <Button variant="ghost" size="sm">
-                    View map <ArrowRight className="h-4 w-4" />
+                    Xarita <ArrowRight className="h-4 w-4" />
                   </Button>
                 </Link>
               </CardHeader>
               <CardContent>
                 <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                  {isLoading
-                    ? Array.from({ length: 3 }).map((_, i) => <StationCardSkeleton key={i} />)
-                    : nearby.map((s) => <StationCard key={s.id} station={s} />)}
+                  {stationsLoading
+                    ? null
+                    : nearest.map((s) => (
+                        <StationCard key={s.id} station={s} />
+                      ))}
                 </div>
               </CardContent>
             </Card>
@@ -83,25 +88,28 @@ export default function DashboardPage() {
                 <CardHeader>
                   <div className="flex items-center gap-2">
                     <Sparkles className="h-5 w-5 text-fuel-green" />
-                    <CardTitle className="text-base">AI Recommendation</CardTitle>
+                    <CardTitle className="text-base">AI tavsiya</CardTitle>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {cheapest && (
+                  {closest && (
                     <>
                       <p className="text-sm text-muted-foreground">
-                        Best value near you right now based on price, queue, and your fuel type.
+                        Sizga eng yaqin va qulay stansiya — masofa va navbat hisobga olingan.
                       </p>
                       <div className="rounded-lg bg-background/80 p-3">
-                        <p className="font-display font-semibold">{cheapest.name}</p>
-                        <p className="text-xs text-muted-foreground">{formatQueue(cheapest.queueMinutes)} wait</p>
+                        <Badge variant="success" className="mb-2">Eng yaqin</Badge>
+                        <p className="font-display font-semibold">{closest.name}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {formatDistance(closest.distanceKm)} · {formatQueue(closest.queueMinutes)}
+                        </p>
                         <Badge variant="success" className="mt-2">
-                          AI-92 from {formatPrice(cheapest.prices[0]?.price ?? 0)}
+                          {closest.prices[0]?.label} — {formatPrice(closest.prices[0]?.price ?? 0)}
                         </Badge>
                       </div>
-                      <Link to={ROUTES.station(cheapest.id)}>
+                      <Link to={ROUTES.station(closest.id)}>
                         <Button className="w-full" size="sm" variant="accent">
-                          Navigate
+                          Ko‘rish
                         </Button>
                       </Link>
                     </>
@@ -113,15 +121,21 @@ export default function DashboardPage() {
                 <CardHeader>
                   <CardTitle className="text-base flex items-center gap-2">
                     <TrendingDown className="h-4 w-4 text-fuel-green" />
-                    Cheapest today
+                    Yaqinlardagi eng arzon
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {cheapest && (
-                    <Link to={ROUTES.station(cheapest.id)} className="block rounded-lg border border-border p-3 hover:bg-muted/50">
-                      <p className="font-medium">{cheapest.name}</p>
+                  {cheapestAmongNearest && (
+                    <Link
+                      to={ROUTES.station(cheapestAmongNearest.id)}
+                      className="block rounded-lg border border-border p-3 hover:bg-muted/50"
+                    >
+                      <p className="font-medium">{cheapestAmongNearest.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {formatDistance(cheapestAmongNearest.distanceKm)}
+                      </p>
                       <p className="text-2xl font-display font-bold text-fuel-green">
-                        {formatPrice(Math.min(...cheapest.prices.map((p) => p.price)))}
+                        {formatPrice(Math.min(...cheapestAmongNearest.prices.map((p) => p.price)))}
                       </p>
                     </Link>
                   )}
@@ -133,7 +147,7 @@ export default function DashboardPage() {
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">Fuel trends (7d)</CardTitle>
+                <CardTitle className="text-base">Yoqilg‘i trendi (7 kun)</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex h-32 items-end justify-between gap-1">
@@ -154,11 +168,11 @@ export default function DashboardPage() {
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
                   <Clock className="h-4 w-4" />
-                  Recent searches
+                  So‘nggi qidiruvlar
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                {['AI-95 near me', 'Green Fuel Hub', '24h diesel'].map((q) => (
+                {['AI-95 yaqinimda', 'Green Fuel Hub', '24/7 dizel'].map((q) => (
                   <button
                     key={q}
                     type="button"
@@ -174,7 +188,7 @@ export default function DashboardPage() {
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
                   <Truck className="h-4 w-4" />
-                  Delivery status
+                  Yetkazib berish
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -183,11 +197,11 @@ export default function DashboardPage() {
                     <Badge variant="warning">{deliveries[0].status.replace('_', ' ')}</Badge>
                     <p className="text-sm font-medium">{deliveries[0].stationName}</p>
                     <p className="text-xs text-muted-foreground">
-                      {deliveries[0].liters}L · ETA {deliveries[0].estimatedMinutes} min
+                      {deliveries[0].liters}L · ~{deliveries[0].estimatedMinutes} daqiqa
                     </p>
                     <Link to={ROUTES.delivery}>
                       <Button variant="outline" size="sm" className="mt-2 w-full">
-                        Track order
+                        Kuzatish
                       </Button>
                     </Link>
                   </div>
@@ -200,7 +214,7 @@ export default function DashboardPage() {
 
           {favorites.length > 0 && (
             <section>
-              <h2 className="mb-4 font-display text-lg font-semibold">Favorite stations</h2>
+              <h2 className="mb-4 font-display text-lg font-semibold">Sevimli stansiyalar</h2>
               <div className="grid gap-4 sm:grid-cols-2">
                 {favorites.map((s) => (
                   <StationCard key={s.id} station={s} variant="horizontal" />

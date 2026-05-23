@@ -1,4 +1,4 @@
-export type FuelType = 'ai92' | 'ai95' | 'ai98' | 'diesel' | 'gas'
+export type FuelType = 'ai92' | 'ai95' | 'ai98' | 'diesel' | 'metan' | 'propan'
 
 export interface FuelPrice {
   type: FuelType
@@ -45,4 +45,6 @@ export interface StationFilters {
   openNow: boolean
   sortBy: 'distance' | 'price' | 'rating' | 'queue'
   search: string
+  /** 'all' = butun O‘zbekiston */
+  city: string
 }

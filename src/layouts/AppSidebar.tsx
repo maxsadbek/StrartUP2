@@ -16,7 +16,7 @@ import { cn } from '@/utils/cn'
 
 const navItems = [
   { to: ROUTES.dashboard, icon: LayoutDashboard, label: 'Dashboard' },
-  { to: ROUTES.map, icon: Map, label: 'Map' },
+  { to: ROUTES.map, icon: Map, label: 'Xarita' },
   { to: ROUTES.stations, icon: Fuel, label: 'Stations' },
   { to: ROUTES.favorites, icon: Heart, label: 'Favorites' },
   { to: ROUTES.delivery, icon: Truck, label: 'Delivery' },

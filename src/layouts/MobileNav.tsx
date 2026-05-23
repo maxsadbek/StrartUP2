@@ -5,7 +5,7 @@ import { cn } from '@/utils/cn'
 
 const items = [
   { to: ROUTES.dashboard, icon: LayoutDashboard, label: 'Home' },
-  { to: ROUTES.map, icon: Map, label: 'Map' },
+  { to: ROUTES.map, icon: Map, label: 'Xarita' },
   { to: ROUTES.favorites, icon: Heart, label: 'Saved' },
   { to: ROUTES.delivery, icon: Truck, label: 'Delivery' },
   { to: ROUTES.profile, icon: User, label: 'Profile' },

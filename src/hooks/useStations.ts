@@ -7,22 +7,21 @@ export function useStations() {
   const filters = useFiltersStore()
   return useQuery({
     queryKey: queryKeys.stations.list({
+      v: 'full-uz',
       search: filters.search,
-      sortBy: filters.sortBy,
       openNow: filters.openNow,
       fuelTypes: filters.fuelTypes,
-      maxDistance: filters.maxDistance,
       minRating: filters.minRating,
     }),
     queryFn: () =>
       stationsService.getAll({
         search: filters.search,
-        sortBy: filters.sortBy,
         openNow: filters.openNow,
         fuelTypes: filters.fuelTypes,
-        maxDistance: filters.maxDistance,
         minRating: filters.minRating,
       }),
+    staleTime: 60 * 60_000,
+    gcTime: 2 * 60 * 60_000,
   })
 }
 
